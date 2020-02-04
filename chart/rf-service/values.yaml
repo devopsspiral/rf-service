@@ -5,20 +5,26 @@
 replicaCount: 1
 
 image:
-  repository: mwcislo/rf-service
-  pullPolicy: Always
+  repository: mwcislo/rf-service-k8s
+  pullPolicy: IfNotPresent
 schedule: "*/1 * * * *"
+storageSize: 1Gi
 config: |
   {
     "fetcher": {
         "type": "ZipFetcher",
-        "url": "https://github.com/devopsspiral/KubeLibrary/archive/master.zip"
+        "url": "https://github.com/devopsspiral/KubeLibrary/archive/incluster.zip"
     },
     "publisher": {
         "type": "CaddyPublisher",
         "url": "http://rf-service-caddy/uploads"
     }
   }
+#Extra env vars for test job
+#extraEnv:
+#  - name: https_proxy
+#    value: http://10.11.12.13:8080/
+
 
 caddy:
   image:
@@ -26,7 +32,7 @@ caddy:
     version: v1.0.0-20190503T1915-git-b0fca0c
     pullPolicy: IfNotPresent
   service:
-    type: ClusterIP
+    type: LoadBalancer
     port: 80
   setup: |
     # Bind address
@@ -51,6 +57,8 @@ caddy:
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
+
+bindToClusterRole: cluster-admin
 
 podSecurityContext:
   fsGroup: 1000
