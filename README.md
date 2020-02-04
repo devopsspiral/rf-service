@@ -16,7 +16,8 @@ kubectl get svc rf-service-caddy
 ```
 
 You should see Caddy browsing empty dir. Every minute there should be test execution and results will be published in Caddy.
-Executed tests are taken from [KubeLibrary](https://github.com/devopsspiral/KubeLibrary/tree/master/testcases).
+Executed tests are taken from [KubeLibrary](https://github.com/devopsspiral/KubeLibrary/tree/master/testcases) and will most 
+probably fail on your cluster. If you want to see them pass you need k3s/k3d and example grafana service as described in [KubeLibrary README](https://github.com/devopsspiral/KubeLibrary).
 
 ## Usage
 
