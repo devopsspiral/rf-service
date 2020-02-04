@@ -1,0 +1,10 @@
+{
+    "fetcher": {
+        "type": "LocalFetcher",
+        "src": "/tmp/testcases"
+    },
+    "publisher": {
+        "type": "CaddyPublisher",
+        "url": "http://172.17.0.2:8080/uploads"
+    }
+}

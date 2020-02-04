@@ -1,0 +1,9 @@
+{
+    "fetcher": {
+        "type": "ZipFetcher",
+        "url": "https://github.com/devopsspiral/KubeLibrary/archive/master.zip"
+    },
+    "publisher": {
+        "type": "LocalPublisher"
+    }
+}

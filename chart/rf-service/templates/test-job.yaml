@@ -1,0 +1,30 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ include "rf-service.fullname" . }}-test-job
+spec:
+  schedule: "{{ .Values.schedule }}"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ include "rf-service.fullname" . }}-sa
+          containers:
+          - name: {{ .Chart.Name }}
+            image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            command: ["rf-service", "/etc/rf-service/run.json"]
+            {{- if .Values.extraEnv }}
+            env:
+            {{- with .Values.extraEnv }}
+{{ toYaml . | indent 12 }}
+            {{- end }}
+            {{- end }}
+            volumeMounts:
+            - name: rf-service-config
+              mountPath: /etc/rf-service/ 
+          restartPolicy: OnFailure
+          volumes:
+          - name: rf-service-config
+            configMap:
+              name: {{ .Release.Name }}-config

@@ -1,0 +1,97 @@
+# Default values for rf-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: mwcislo/rf-service
+  pullPolicy: Always
+schedule: "*/1 * * * *"
+config: |
+  {
+    "fetcher": {
+        "type": "ZipFetcher",
+        "url": "https://github.com/devopsspiral/KubeLibrary/archive/master.zip"
+    },
+    "publisher": {
+        "type": "CaddyPublisher",
+        "url": "http://rf-service-caddy/uploads"
+    }
+  }
+
+caddy:
+  image:
+    repository: jumanjiman/caddy
+    version: v1.0.0-20190503T1915-git-b0fca0c
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+  setup: |
+    # Bind address
+    :8080
+
+    tls off
+    log stdout
+    errors stderr
+
+    # After this line, all other paths are relative to root.
+    root /tmp/store
+    browse /
+
+
+    upload /uploads {
+      to "/tmp/store"
+    }
+
+    }
+
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+
+
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths: []
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

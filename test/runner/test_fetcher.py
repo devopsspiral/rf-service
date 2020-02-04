@@ -1,0 +1,96 @@
+import mock
+import os
+import unittest
+import shutil
+from rf_runner.fetcher import AbstractFetcher, LocalFetcher, ZipFetcher, \
+                           fetcher_factory
+
+
+class TestFetcher(unittest.TestCase):
+    def test_abstract_fetcher_inits(self):
+        f = AbstractFetcher()
+        self.assertFalse(os.path.exists(f.context))
+        self.assertTrue(f.context.startswith('/tmp/rf-runner/'))
+        self.assertFalse(f.context.endswith('rf-runner/'))
+        another = AbstractFetcher()
+        self.assertNotEqual(f.context, another.context)
+
+    def test_abstract_fetcher_gets_context(self):
+        f = AbstractFetcher()
+        self.assertTrue(f.context, f.get_context())
+
+    @mock.patch('rf_runner.fetcher.AbstractFetcher.fetch')
+    @mock.patch('rf_runner.fetcher.AbstractFetcher.clean')
+    def test_abstract_fetcher_update_runs_clean_and_fetch(self, mock_clean, mock_fetch):
+        f = AbstractFetcher()
+        f.update()
+        mock_fetch.assert_called_once()
+        mock_clean.assert_called_once()
+
+    def test_abstract_fetcher_creates_and_cleans_context(self):
+        with AbstractFetcher() as f:
+            self.assertTrue(os.path.exists(f.context))
+        self.assertFalse(os.path.exists(f.context))
+
+    def test_fetcher_factory_creates_localfetcher(self):
+        data = {'type': 'LocalFetcher', 'src': 'testcases'}
+        f = fetcher_factory(data)
+        self.assertTrue(isinstance(f, LocalFetcher))
+        self.assertEqual('testcases', f.src)
+
+    def test_fetcher_factory_creates_zipfetcher(self):
+        data = {'type': 'ZipFetcher', 'url': 'http://someurl'}
+        f = fetcher_factory(data)
+        self.assertTrue(isinstance(f, ZipFetcher))
+        self.assertEqual('http://someurl', f.url)
+        data = {'type': 'ZipFetcher', 'url': 'http://someurl', 'path': 'somepath'}
+        f = fetcher_factory(data)
+        self.assertEqual('http://someurl', f.url)
+        self.assertEqual('somepath', f.path)
+
+    def test_local_fetcher_inits(self):
+        f = LocalFetcher('testcases')
+        self.assertFalse(os.path.exists(f.context))
+        self.assertTrue(f.context.startswith('/tmp/rf-runner/'))
+
+    def test_local_fetcher_gets_files(self):
+        with LocalFetcher('testcases') as f:
+            f.fetch()
+            self.assertEqual(1, len(os.listdir(f.get_context())))
+        self.assertFalse(os.path.exists(f.context))
+
+    def test_local_fetcher_cleans_context(self):
+        with LocalFetcher('testcases') as f:
+            f.fetch()
+            self.assertEqual(1, len(os.listdir(f.get_context())))
+            f.clean()
+            self.assertEqual(0, len(os.listdir(f.get_context())))
+
+    def test_local_fetcher_removes_before_fetch(self):
+        with LocalFetcher('testcases') as f:
+            f.update()
+            file_path = os.path.join(f.get_context(),
+                                     os.listdir(f.get_context())[0])
+            shutil.copy(file_path, file_path+'_bu')
+            f.update()
+            self.assertEqual(1, len(os.listdir(f.get_context())))
+
+    def test_zip_fetcher_inits(self):
+        f = ZipFetcher('https://github.com/devopsspiral/KubeLibrary/archive/master.zip')
+        self.assertFalse(os.path.exists(f.context))
+        self.assertTrue(f.context.startswith('/tmp/rf-runner/'))
+
+    def test_zip_fetcher_gets_all_files(self):
+        with ZipFetcher('https://github.com/devopsspiral/KubeLibrary/archive/master.zip') as f:
+            f.fetch()
+            self.assertEqual('KubeLibrary-master', os.listdir(f.get_context())[0])
+        self.assertFalse(os.path.exists(f.context))
+
+    def test_zip_fetcher_gets_specific_dir(self):
+        with ZipFetcher('https://github.com/devopsspiral/KubeLibrary/archive/master.zip', 'KubeLibrary-master/testcases') as f:
+            f.fetch()
+            existing_files = []
+            for r, d, files in os.walk(f.get_context()):
+                for filename in files:
+                    existing_files.append(os.path.join(r, filename))
+            self.assertEqual(3, len(existing_files))

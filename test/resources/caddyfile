@@ -1,0 +1,17 @@
+# Bind address
+:8080
+
+tls off
+log stdout
+errors stderr
+
+# After this line, all other paths are relative to root.
+root /tmp
+browse /
+
+
+upload /uploads {
+  to "/tmp"
+}
+
+}

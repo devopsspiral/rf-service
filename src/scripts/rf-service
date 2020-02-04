@@ -1,0 +1,15 @@
+#!/usr/bin/python
+import json
+import sys
+from rf_runner.runner import Runner
+
+
+def main():
+    with open(sys.argv[1]) as json_file:
+        data = json.load(json_file)
+        r = Runner(data)
+        r.run()
+
+
+if __name__ == "__main__":
+    main()
