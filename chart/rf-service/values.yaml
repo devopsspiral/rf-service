@@ -51,7 +51,6 @@ caddy:
       to "/tmp/store"
     }
 
-    }
 
 
 imagePullSecrets: []
