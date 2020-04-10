@@ -1,6 +1,8 @@
+{{- if .Values.config -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-config
 data:
   run.json: {{ .Values.config | quote }}
+{{- end }}

@@ -2,11 +2,16 @@ import mock
 import os
 import unittest
 import shutil
-from rf_runner.fetcher import AbstractFetcher, LocalFetcher, ZipFetcher, \
-                           fetcher_factory
+from rf_runner.fetcher import AbstractFetcher, LocalFetcher, ZipFetcher
+from rf_runner.fetcher_factory import FetcherFactory
 
+lf_config = {'src': 'testcases'}
+zf_config = {'url': 'https://github.com/devopsspiral/KubeLibrary/archive/master.zip'}
+zfp_config = {'url': 'https://github.com/devopsspiral/KubeLibrary/archive/master.zip',
+              'path': 'KubeLibrary-master/testcases'}
 
 class TestFetcher(unittest.TestCase):
+
     def test_abstract_fetcher_inits(self):
         f = AbstractFetcher()
         self.assertFalse(os.path.exists(f.context))
@@ -34,40 +39,43 @@ class TestFetcher(unittest.TestCase):
 
     def test_fetcher_factory_creates_localfetcher(self):
         data = {'type': 'LocalFetcher', 'src': 'testcases'}
-        f = fetcher_factory(data)
+        ff = FetcherFactory()
+        f = ff.get(data)
         self.assertTrue(isinstance(f, LocalFetcher))
         self.assertEqual('testcases', f.src)
 
     def test_fetcher_factory_creates_zipfetcher(self):
         data = {'type': 'ZipFetcher', 'url': 'http://someurl'}
-        f = fetcher_factory(data)
+        ff = FetcherFactory()
+        f = ff.get(data)
         self.assertTrue(isinstance(f, ZipFetcher))
         self.assertEqual('http://someurl', f.url)
         data = {'type': 'ZipFetcher', 'url': 'http://someurl', 'path': 'somepath'}
-        f = fetcher_factory(data)
+        ff = FetcherFactory()
+        f = ff.get(data)
         self.assertEqual('http://someurl', f.url)
         self.assertEqual('somepath', f.path)
 
     def test_local_fetcher_inits(self):
-        f = LocalFetcher('testcases')
+        f = LocalFetcher(lf_config)
         self.assertFalse(os.path.exists(f.context))
         self.assertTrue(f.context.startswith('/tmp/rf-runner/'))
 
     def test_local_fetcher_gets_files(self):
-        with LocalFetcher('testcases') as f:
+        with LocalFetcher(lf_config) as f:
             f.fetch()
             self.assertEqual(1, len(os.listdir(f.get_context())))
         self.assertFalse(os.path.exists(f.context))
 
     def test_local_fetcher_cleans_context(self):
-        with LocalFetcher('testcases') as f:
+        with LocalFetcher(lf_config) as f:
             f.fetch()
             self.assertEqual(1, len(os.listdir(f.get_context())))
             f.clean()
             self.assertEqual(0, len(os.listdir(f.get_context())))
 
     def test_local_fetcher_removes_before_fetch(self):
-        with LocalFetcher('testcases') as f:
+        with LocalFetcher(lf_config) as f:
             f.update()
             file_path = os.path.join(f.get_context(),
                                      os.listdir(f.get_context())[0])
@@ -76,21 +84,21 @@ class TestFetcher(unittest.TestCase):
             self.assertEqual(1, len(os.listdir(f.get_context())))
 
     def test_zip_fetcher_inits(self):
-        f = ZipFetcher('https://github.com/devopsspiral/KubeLibrary/archive/master.zip')
+        f = ZipFetcher(zf_config)
         self.assertFalse(os.path.exists(f.context))
         self.assertTrue(f.context.startswith('/tmp/rf-runner/'))
 
     def test_zip_fetcher_gets_all_files(self):
-        with ZipFetcher('https://github.com/devopsspiral/KubeLibrary/archive/master.zip') as f:
+        with ZipFetcher(zf_config) as f:
             f.fetch()
             self.assertEqual('KubeLibrary-master', os.listdir(f.get_context())[0])
         self.assertFalse(os.path.exists(f.context))
 
     def test_zip_fetcher_gets_specific_dir(self):
-        with ZipFetcher('https://github.com/devopsspiral/KubeLibrary/archive/master.zip', 'KubeLibrary-master/testcases') as f:
+        with ZipFetcher(zfp_config) as f:
             f.fetch()
             existing_files = []
-            for r, d, files in os.walk(f.get_context()):
+            for r, _, files in os.walk(f.get_context()):
                 for filename in files:
                     existing_files.append(os.path.join(r, filename))
             self.assertEqual(3, len(existing_files))

@@ -1,0 +1,10 @@
+{
+    "fetcher": {
+        "type": "LocalFetcher",
+        "src": "testcases"
+    },
+    "publisher": {
+        "type": "LocalPublisher",
+        "dest": "/tmp/"
+    }
+}

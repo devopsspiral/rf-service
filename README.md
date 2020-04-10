@@ -1,6 +1,6 @@
 # RF-service
 
-RobotFramework service for running tests/healthchecks from kubernetes cluster and publish results there. Currently implemented as Kubernetes CronJob that executes tests at given schedule and publish it in Caddy server. Next steps include making the service RESTful.
+RobotFramework is a service for running tests/healthchecks for kubernetes cluster. It can work in two modes: on-demand execution with [frontend](https://github.com/devopsspiral/rf-service-fe) and as Kubernetes CronJob that executes tests at given schedule and publish it in Caddy server. 
 
 ## Quick start
 
@@ -9,13 +9,13 @@ git clone https://github.com/devopsspiral/rf-service.git
 cd rf-service
 helm install rf-service ~/git/rf-service/chart/rf-service/
 
-#Caddy is exposed as service type LoadBalancer by default, but you can use ingress
-kubectl get svc rf-service-caddy
-
-#open browser with url http://<external-ip>/ or http://<worker ip>:<node port>/
+#By default rf-service-fe is exposed on http://rf-service.local
+#If you running it on k3d/k3s you might need to add entries to you /etc/hosts
 ```
 
-You should see Caddy browsing empty dir. Every minute there should be test execution and results will be published in Caddy.
+To run tests you need to first go to Configure tab and define fetcher (for getting test source) and publisher (to define where to put results). You can use internal caddy container as publisher target just use values from configuration file described in [rf-service configuration](#rf-service-configuration).
+
+If executed as CronJob with default settings, every minute there should be test execution and results will be published in Results tab.
 Executed tests are taken from [KubeLibrary](https://github.com/devopsspiral/KubeLibrary/tree/master/testcases) and will most 
 probably fail on your cluster. If you want to see them pass you need k3s/k3d and example grafana service as described in [KubeLibrary README](https://github.com/devopsspiral/KubeLibrary).
 
@@ -39,7 +39,7 @@ By default helm chart is using this image for running tests
 
 ### rf-service configuration
 
-At this point rf-service is utilized as CronJob and it needs .json file to configure its behaviour. It is passed as only argument to rf-service executable (see [this line](https://github.com/devopsspiral/rf-service/blob/f07716d068b9e7aa739f0c6c024e8b62c78d23c0/chart/rf-service/templates/test-job.yaml#L16))
+If rf-service is utilized as CronJob it needs .json file to configure its behaviour. It is passed as only argument to rf-service executable (see [this line](https://github.com/devopsspiral/rf-service/blob/f07716d068b9e7aa739f0c6c024e8b62c78d23c0/chart/rf-service/templates/test-job.yaml#L17))
 
 The example content of the file is as below:
 ```
@@ -50,14 +50,16 @@ The example content of the file is as below:
     },
     "publisher": {
         "type": "CaddyPublisher",
-        "url": "http://rf-service-caddy/uploads"
+        "url": "http://rf-service:8090/uploads"
     }
   }
 ```
 
-It configures rf-service to get testcases from given url (branch in github) and publish results in Caddy server using k8s service DN rf-service-caddy. You can create your own fetchers and publishers.
+It configures rf-service to get testcases from given url (branch in github) and publish results in Caddy server using k8s service DN rf-service (providing you named release rf-service when executing helm install). You can create your own fetchers and publishers.
 
-In helm chart file content can be defined using .Values.config and it is kept as ConfigMap on cluster.
+In helm chart, config file content can be defined using .Values.config and it is kept as ConfigMap on cluster.
+
+When using Web UI (.Values.config is empty string) the same configuration can be done in Configure tab. You need to save both Publisher and Fetcher config separetly. To use internal Caddy container you need to pass http://<ingress host>/caddy/uploads, i.e. http://rf-service.local/caddy/uploads
 
 ### Helm chart
 
@@ -68,9 +70,9 @@ Below you can find table with parameters that are most important.
 | image.repository | mwcislo/rf-service-k8s | should point to your custom test image
 | schedule | \*/1 \* \* \* \* | cron=like schedule for test execution
 | storageSize | 1Gi | volume size used for keeping reports in Caddy
-| config | (as described in [rf-service configuration](#rf-service-configuration)) | .json file with configuration
+| config | "" | .json file with configuration
 | bindToClusterRole | cluster-admin |  defines which cluster role to use
-| caddy.service.type | LoadBalancer | defines way of exposing rf-service
+| rfFE.service.type | ClusterIP | defines way of exposing rf-service-fe
 | caddy.setup | ... | configures caddy, upload part shouldn't be changed
 
 ## Development
@@ -85,7 +87,28 @@ virtualenv .venv
 . .venv/bin/activate
 pip install --user -r requirements.txt
 export PYTHONPATH=./src:${PYTHONPATH}
+cd src
+python -m rf_runner.api
+# or
+scripts/rf-service [config.json]
+# or from docker
+docker run -it --rm -p 5000:5000 mwcislo/rf-service:0.x.0
+# API is on http://localhost:5000/api/
+
 
 # testing
 python -m unittest
 ```
+
+## References
+
+### Articles
+
+[Robot Framework library for testing Kubernetes](https://devopsspiral.com/articles/k8s/robotframework-kubelibrary/)
+[Testing on kubernetes - rf-service](https://devopsspiral.com/articles/k8s/robotframework-service/)
+[Intro to Vue.js. Testing on kubernetes - rf-service frontend.](https://devopsspiral.com/articles/k8s/robotframework-service-fe/)
+
+### Repositories
+
+[KubeLibrary](https://github.com/devopsspiral/KubeLibrary)
+[frontend](https://github.com/devopsspiral/rf-service-fe)

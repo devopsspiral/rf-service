@@ -4,6 +4,7 @@
         "url": "https://github.com/devopsspiral/KubeLibrary/archive/master.zip"
     },
     "publisher": {
-        "type": "LocalPublisher"
+        "type": "LocalPublisher",
+        "src": "somecontext"
     }
 }

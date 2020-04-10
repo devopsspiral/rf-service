@@ -20,17 +20,25 @@ spec:
     {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      containers:       
-        - name: {{ .Chart.Name }}-caddy
+      containers:
+      {{- if not .Values.config }}
+        - name: {{ .Chart.Name }}-rf-service
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.caddy.image.repository }}:{{ .Values.caddy.image.version }}"
-          imagePullPolicy: {{ .Values.caddy.image.pullPolicy }}
-          volumeMounts:
-          - name: caddyfile
-            mountPath: /etc/caddy/
-          - name: store
-            mountPath: /tmp/store
+          image: "{{ .Values.rfService.image.repository }}:{{ .Values.rfService.image.version }}"
+          imagePullPolicy: {{ .Values.rfService.image.pullPolicy }}
+          ports:
+            - name: api
+              containerPort: 5000
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- end }}
+        - name: {{ .Chart.Name }}-rf-service-fe
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.rfFE.image.repository }}:{{ .Values.rfFE.image.version }}"
+          imagePullPolicy: {{ .Values.rfFE.image.pullPolicy }}
           ports:
             - name: http
               containerPort: 8080
@@ -43,6 +51,30 @@ spec:
             httpGet:
               path: /
               port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+        - name: {{ .Chart.Name }}-caddy
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.caddy.image.repository }}:{{ .Values.caddy.image.version }}"
+          imagePullPolicy: {{ .Values.caddy.image.pullPolicy }}
+          volumeMounts:
+          - name: caddyfile
+            mountPath: /etc/caddy/
+          - name: store
+            mountPath: /tmp/store
+          ports:
+            - name: caddy
+              containerPort: 8090
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: caddy
+          readinessProbe:
+            httpGet:
+              path: /
+              port: caddy
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:

@@ -1,0 +1,130 @@
+Metadata-Version: 2.1
+Name: rf-service
+Version: 0.2.0
+Summary: Robot Framework service
+Home-page: https://github.com/devopsspiral/rf-service
+Author: Michał Wcisło
+Author-email: mwcislo999@gmail.com
+License: MIT
+Description: # RF-service
+        
+        RobotFramework is a service for running tests/healthchecks for kubernetes cluster. It can work in two modes: on-demand execution with [frontend](https://github.com/devopsspiral/rf-service-fe) and as Kubernetes CronJob that executes tests at given schedule and publish it in Caddy server. 
+        
+        ## Quick start
+        
+        ```
+        git clone https://github.com/devopsspiral/rf-service.git
+        cd rf-service
+        helm install rf-service ~/git/rf-service/chart/rf-service/
+        
+        #By default rf-service-fe is exposed on http://rf-service.local
+        #If you running it on k3d/k3s you might need to add entries to you /etc/hosts
+        ```
+        
+        To run tests you need to first go to Configure tab and define fetcher (for getting test source) and publisher (to define where to put results). You can use internal caddy container as publisher target just use values from configuration file described in [rf-service configuration](#rf-service-configuration).
+        
+        If executed as CronJob with default settings, every minute there should be test execution and results will be published in Results tab.
+        Executed tests are taken from [KubeLibrary](https://github.com/devopsspiral/KubeLibrary/tree/master/testcases) and will most 
+        probably fail on your cluster. If you want to see them pass you need k3s/k3d and example grafana service as described in [KubeLibrary README](https://github.com/devopsspiral/KubeLibrary).
+        
+        ## Usage
+        
+        ### Building own test image
+        
+        rf-service image should contain only logic connected with running RobotFramework tests, to include external test libraries you should build your own image similar to dockerfile in `docker-k8s/Dockerfile`:
+        
+        ```
+        FROM mwcislo/rf-service
+        
+        COPY docker-k8s/requirements.txt .
+        
+        RUN pip install -r requirements.txt
+        
+        CMD rf-service
+        ```
+        
+        By default helm chart is using this image for running tests
+        
+        ### rf-service configuration
+        
+        If rf-service is utilized as CronJob it needs .json file to configure its behaviour. It is passed as only argument to rf-service executable (see [this line](https://github.com/devopsspiral/rf-service/blob/f07716d068b9e7aa739f0c6c024e8b62c78d23c0/chart/rf-service/templates/test-job.yaml#L17))
+        
+        The example content of the file is as below:
+        ```
+          {
+            "fetcher": {
+                "type": "ZipFetcher",
+                "url": "https://github.com/devopsspiral/KubeLibrary/archive/incluster.zip"
+            },
+            "publisher": {
+                "type": "CaddyPublisher",
+                "url": "http://rf-service:8090/uploads"
+            }
+          }
+        ```
+        
+        It configures rf-service to get testcases from given url (branch in github) and publish results in Caddy server using k8s service DN rf-service (providing you named release rf-service when executing helm install). You can create your own fetchers and publishers.
+        
+        In helm chart, config file content can be defined using .Values.config and it is kept as ConfigMap on cluster.
+        
+        When using Web UI (.Values.config is empty string) the same configuration can be done in Configure tab. You need to save both Publisher and Fetcher config separetly. To use internal Caddy container you need to pass http://<ingress host>/caddy/uploads, i.e. http://rf-service.local/caddy/uploads
+        
+        ### Helm chart
+        
+        Below you can find table with parameters that are most important.
+        
+        | Chart parameter   | Default | Comment |
+        | ------------- | ------------- | ------------- |
+        | image.repository | mwcislo/rf-service-k8s | should point to your custom test image
+        | schedule | \*/1 \* \* \* \* | cron=like schedule for test execution
+        | storageSize | 1Gi | volume size used for keeping reports in Caddy
+        | config | "" | .json file with configuration
+        | bindToClusterRole | cluster-admin |  defines which cluster role to use
+        | rfFE.service.type | ClusterIP | defines way of exposing rf-service-fe
+        | caddy.setup | ... | configures caddy, upload part shouldn't be changed
+        
+        ## Development
+        
+        ```
+        # clone repo
+        git clone https://github.com/devopsspiral/rf-service.git
+        cd rf-service
+        
+        # create virtualenv
+        virtualenv .venv
+        . .venv/bin/activate
+        pip install --user -r requirements.txt
+        export PYTHONPATH=./src:${PYTHONPATH}
+        cd src
+        python -m rf_runner.api
+        # or
+        scripts/rf-service [config.json]
+        # API is on http://localhost:5000/api/
+        
+        
+        # testing
+        python -m unittest
+        ```
+        
+        ## References
+        
+        ### Articles
+        
+        [Robot Framework library for testing Kubernetes](https://devopsspiral.com/articles/k8s/robotframework-kubelibrary/)
+        [Testing on kubernetes - rf-service](https://devopsspiral.com/articles/k8s/robotframework-service/)
+        [Intro to Vue.js. Testing on kubernetes - rf-service frontend.](https://devopsspiral.com/articles/k8s/robotframework-service-fe/)
+        
+        ### Repositories
+        
+        [KubeLibrary](https://github.com/devopsspiral/KubeLibrary)
+        [frontend](https://github.com/devopsspiral/rf-service-fe)
+        
+Keywords: robotframework testing test automation
+Platform: UNKNOWN
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Software Development :: Testing
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown

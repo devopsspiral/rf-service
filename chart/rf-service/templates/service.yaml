@@ -1,15 +1,25 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "rf-service.fullname" . }}-caddy
+  name: {{ include "rf-service.fullname" . }}
   labels:
     {{- include "rf-service.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.caddy.service.type }}
+  type: {{ .Values.rfFE.service.type }}
   ports:
-    - port: {{ .Values.caddy.service.port }}
+    - port: {{ .Values.rfFE.service.port }}
       targetPort: http
       protocol: TCP
       name: http
+    - port: 8090
+      targetPort: caddy
+      protocol: TCP
+      name: caddy
+  {{- if not .Values.config }}
+    - port: 5000
+      targetPort: api
+      protocol: TCP
+      name: api
+  {{- end }}
   selector:
     {{- include "rf-service.selectorLabels" . | nindent 4 }}

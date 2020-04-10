@@ -1,3 +1,4 @@
+import logging
 import os
 import requests
 import uuid
@@ -5,13 +6,21 @@ import shutil
 import zipfile
 from .exceptions import NotOverriddenException
 
+logger = logging.getLogger("fetcher")
+
 
 class AbstractFetcher(object):
     """Fetcher should get testcases from sources for execution"""
 
-    def __init__(self):
+    def __init__(self, data=None):
         self.id = str(uuid.uuid4())
         self.context = f'/tmp/rf-runner/{self.id}/'
+        if data:
+            self._load_meta(data)
+
+    def _load_meta(self, data):
+        """Load parameters from json structure"""
+        raise NotOverriddenException
 
     def __enter__(self):
         self.create_context()
@@ -46,13 +55,17 @@ class AbstractFetcher(object):
         """Removes all the contect of test context and context itself"""
         shutil.rmtree(self.context)
 
+    @staticmethod
+    def meta():
+        """Returns parameters needed to initialize Fetcher"""
+        raise NotOverriddenException
+
 
 class LocalFetcher(AbstractFetcher):
     """LocalFetcher takes testcases from local filesystem"""
 
-    def __init__(self, src):
-        super().__init__()
-        self.src = src
+    def _load_meta(self, data):
+        self.src = data.get('src')
 
     def fetch(self):
         """Performs actual fetch of testcases into context folder"""
@@ -60,16 +73,20 @@ class LocalFetcher(AbstractFetcher):
         for filename in files:
             file_path = os.path.join(self.src, filename)
             if os.path.isfile(file_path):
+                logger.debug(f'Copying {file_path}')
                 shutil.copy(file_path, self.context)
+
+    @staticmethod
+    def meta():
+        return {'src': 'string'}
 
 
 class ZipFetcher(AbstractFetcher):
     """ZiFetcher takes testcases from zip over http"""
 
-    def __init__(self, url, path=None):
-        super().__init__()
-        self.url = url
-        self.path = path
+    def _load_meta(self, data):
+        self.url = data.get('url')
+        self.path = data.get('path')
 
     def fetch(self):
         """Performs actual fetch of testcases into context folder"""
@@ -85,9 +102,6 @@ class ZipFetcher(AbstractFetcher):
                 archive.extractall(self.context)
         os.remove(zippath)
 
-
-def fetcher_factory(fetcher_conf):
-    if fetcher_conf['type'] == 'LocalFetcher':
-        return LocalFetcher(fetcher_conf['src'])
-    elif fetcher_conf['type'] == 'ZipFetcher':
-        return ZipFetcher(fetcher_conf['url'], fetcher_conf.get('path', None))
+    @staticmethod
+    def meta():
+        return {'url': 'string', 'path': 'string'}

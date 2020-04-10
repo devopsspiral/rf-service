@@ -3,23 +3,33 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-
-image:
-  repository: mwcislo/rf-service-k8s
-  pullPolicy: IfNotPresent
+rfService:
+  image:
+    repository: mwcislo/rf-service
+    version: 0.2.0
+    pullPolicy: IfNotPresent
+rfFE:
+  image:
+    repository: mwcislo/rf-service-fe
+    version: 0.1.0
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
 schedule: "*/1 * * * *"
 storageSize: 1Gi
-config: |
-  {
-    "fetcher": {
-        "type": "ZipFetcher",
-        "url": "https://github.com/devopsspiral/KubeLibrary/archive/incluster.zip"
-    },
-    "publisher": {
-        "type": "CaddyPublisher",
-        "url": "http://rf-service-caddy/uploads"
-    }
-  }
+config: ""
+# config: |
+#   {
+#     "fetcher": {
+#         "type": "ZipFetcher",
+#         "url": "https://github.com/devopsspiral/KubeLibrary/archive/incluster.zip"
+#     },
+#     "publisher": {
+#         "type": "CaddyPublisher",
+#         "url": "http://rf-service:8090/uploads"
+#     }
+#   }
 #Extra env vars for test job
 #extraEnv:
 #  - name: https_proxy
@@ -31,12 +41,9 @@ caddy:
     repository: jumanjiman/caddy
     version: v1.0.0-20190503T1915-git-b0fca0c
     pullPolicy: IfNotPresent
-  service:
-    type: LoadBalancer
-    port: 80
   setup: |
     # Bind address
-    :8080
+    :8090
 
     tls off
     log stdout
@@ -46,7 +53,9 @@ caddy:
     root /tmp/store
     browse /
 
-
+    rewrite /caddy/ {
+      to /{file} /
+    }
     upload /uploads {
       to "/tmp/store"
     }
@@ -73,13 +82,12 @@ securityContext: {}
 
 
 ingress:
-  enabled: false
+  enabled: true
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
-    - host: chart-example.local
-      paths: []
+    - host: rf-service.local
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
