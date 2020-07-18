@@ -1,11 +1,16 @@
 import logging
 import os
+import site
+import sys
+import subprocess
 from robot.api import TestSuiteBuilder
-from .executor import Executor
-from .publisher_factory import PublisherFactory
-from .fetcher_factory import FetcherFactory
+from rf_runner.executor import Executor
+from rf_runner.publisher_factory import PublisherFactory
+from rf_runner.fetcher_factory import FetcherFactory
 
-logger = logging.getLogger("fetcher")
+logging.basicConfig()
+logger = logging.getLogger("runner")
+logger.setLevel(logging.DEBUG)
 
 
 class Runner(object):
@@ -17,12 +22,43 @@ class Runner(object):
         self.config.register_publisher_callback(self.init_publisher)
 
     def init_fetcher(self):
-        self.fetcher = FetcherFactory().get(self.config.get_fetcher())
-        self.fetcher.create_context()
-        self.fetcher.update()
+        if self.config.get_fetcher():
+            self.fetcher = FetcherFactory.get(self.config.get_fetcher())
+            self.fetcher.create_context()
+            self.fetcher.update()
+            self.install_dependencies()
+
+    def install_dependencies(self):
+        if self.has_requirements():
+            logger.info("Installing extra dependencies")
+            logger.info(self.pip_install_requirements().decode("utf-8"))
+
+    def get_requirements(self):
+        for root, dirs, files in os.walk(self.fetcher.get_context()):
+            for file in files:
+                if file.endswith("requirements.txt"):
+                    return os.path.join(root, file)
+
+    def has_requirements(self):
+        if self.get_requirements():
+            return True
+        return False
+
+    def pip_install_requirements(self):
+        pip_cmdline = [sys.executable, '-m', 'pip']
+        try:
+            # venv
+            if hasattr(sys, 'real_prefix') or (hasattr(sys, 'base_prefix') and (sys.base_prefix != sys.prefix)):
+                return subprocess.check_output(pip_cmdline + ['install', '--requirement', str(self.get_requirements())], stderr=subprocess.STDOUT)
+            else:
+                sys.path.append(site.USER_SITE)
+                return subprocess.check_output(pip_cmdline + ['install', '--user', '--requirement', str(self.get_requirements())], stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            return e.output
 
     def init_publisher(self):
-        self.publisher = PublisherFactory().get(self.config.get_publisher())
+        if self.config.get_publisher():
+            self.publisher = PublisherFactory.get(self.config.get_publisher())
 
     def discover_tests(self):
         if self.fetcher:

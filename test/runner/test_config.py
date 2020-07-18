@@ -3,6 +3,17 @@ from rf_runner.config import Config
 from rf_runner.publisher_factory import PublisherFactory
 
 
+example_mixed = {"publisher": {
+                                "type": "CaddyPublisher",
+                                "url": "http://127.0.0.1:8080/uploads"
+                            },
+                 "fetcher": {
+                        "type": "LocalFetcher",
+                        "src": "testcases"
+                       }
+                 }
+
+
 class TestConfig(unittest.TestCase):
 
     def test_config_inits(self):
@@ -13,7 +24,15 @@ class TestConfig(unittest.TestCase):
         self.assertIsNone(c.publisher_callback)
 
     def test_config_inits_from_file(self):
-        c = Config('test/resources/run1.json')
+        c = Config(config_file='test/resources/run1.json')
+        self.assertEqual({'type': 'LocalFetcher', 'src': 'testcases'},
+                         c.get_fetcher())
+        self.assertEqual({'type': 'CaddyPublisher',
+                          'url': 'http://127.0.0.1:8080/uploads'},
+                         c.get_publisher())
+
+    def test_config_inits_from_dict(self):
+        c = Config(data=example_mixed)
         self.assertEqual({'type': 'LocalFetcher', 'src': 'testcases'},
                          c.get_fetcher())
         self.assertEqual({'type': 'CaddyPublisher',
@@ -55,3 +74,39 @@ class TestConfig(unittest.TestCase):
         data = {'type': 'LocalPublisher', 'dest': 'somecontext'}
         c.load_publisher(data)
         self.assertTrue(called)
+
+    def test_config_callback_on_file_config(self):
+        c = Config(config_file='test/resources/run1.json')
+        called_fetcher = False
+
+        def callback_fetcher():
+            nonlocal called_fetcher
+            called_fetcher = True
+
+        called_publisher = False
+
+        def callback_publisher():
+            nonlocal called_publisher
+            called_publisher = True
+        c.register_fetcher_callback(callback_fetcher)
+        self.assertTrue(called_fetcher)
+        c.register_fetcher_callback(callback_publisher)
+        self.assertTrue(called_publisher)
+
+    def test_config_callback_on_data_config(self):
+        c = Config(data=example_mixed)
+        called_fetcher = False
+
+        def callback_fetcher():
+            nonlocal called_fetcher
+            called_fetcher = True
+
+        called_publisher = False
+
+        def callback_publisher():
+            nonlocal called_publisher
+            called_publisher = True
+        c.register_fetcher_callback(callback_fetcher)
+        self.assertTrue(called_fetcher)
+        c.register_fetcher_callback(callback_publisher)
+        self.assertTrue(called_publisher)

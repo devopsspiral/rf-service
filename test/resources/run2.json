@@ -5,6 +5,6 @@
     },
     "publisher": {
         "type": "LocalPublisher",
-        "src": "somecontext"
+        "dest": "somecontext"
     }
 }

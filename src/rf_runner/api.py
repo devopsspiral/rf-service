@@ -3,8 +3,8 @@ import logging
 from flask import Flask, jsonify
 from flask import request
 from flask_cors import CORS
-from .publisher_factory import PublisherFactory
-from .fetcher_factory import FetcherFactory
+from rf_runner.publisher_factory import PublisherFactory
+from rf_runner.fetcher_factory import FetcherFactory
 from rf_runner.config import Config
 from rf_runner.runner import Runner
 
@@ -15,15 +15,15 @@ from rf_runner.runner import Runner
 
 app = Flask(__name__)
 CORS(app)
-pf = PublisherFactory()
-ff = FetcherFactory()
+# pf = PublisherFactory()
+# ff = FetcherFactory()
 config = Config()
 runner = Runner(config)
 
 
 @app.route('/api/publishers', methods=['GET'])
 def publishers():
-    return jsonify(pf.get_meta())
+    return jsonify(PublisherFactory.get_meta())
 
 
 @app.route('/api/publishers_conf', methods=['GET', 'POST'])
@@ -37,7 +37,7 @@ def publishers_conf():
 
 @app.route('/api/fetchers', methods=['GET'])
 def fetchers():
-    return jsonify(ff.get_meta())
+    return jsonify(FetcherFactory.get_meta())
 
 
 @app.route('/api/fetchers_conf', methods=['GET', 'POST'])

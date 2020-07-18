@@ -17,15 +17,15 @@ class TestPublisher(unittest.TestCase):
         self.assertRaises(NotOverriddenException, AbstractPublisher, {})
 
     def test_publisher_factory_creates_localpublisher(self):
-        pf = PublisherFactory()
+        # pf = PublisherFactory()
         data = {'type': 'LocalPublisher', 'dest': 'somecontext'}
-        f = pf.get(data)
+        f = PublisherFactory.get(data)
         self.assertTrue(isinstance(f, LocalPublisher))
 
     def test_publisher_factory_creates_caddypublisher(self):
-        pf = PublisherFactory()
+        # pf = PublisherFactory()
         data = {'type': 'CaddyPublisher', 'url': 'http://someurl'}
-        f = pf.get(data)
+        f = PublisherFactory.get(data)
         self.assertTrue(isinstance(f, CaddyPublisher))
 
     def test_local_publisher_inits(self):
