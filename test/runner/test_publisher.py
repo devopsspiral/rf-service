@@ -37,13 +37,13 @@ class TestPublisher(unittest.TestCase):
         self.assertEqual({'type': 'LocalPublisher', 'dest': 'results'}, p.jsonify())
 
     def test_localpublisher_publishes_from_result(self):
-        with LocalFetcher({'src': 'testcases'}) as f:
+        with LocalFetcher({'src': 'test/resources/testcases'}) as f:
             f.update()
             e = Executor(f.get_context())
             p = LocalPublisher({'dest': f.get_context()})
             result = e.execute()
             stats = result.suite.statistics
-            self.assertEqual(stats.critical.total, 1)
+            self.assertEqual(stats.critical.total, 2)
             p.publish(result)
             found = False
             for filename in os.listdir(f.get_context()):
@@ -56,13 +56,13 @@ class TestPublisher(unittest.TestCase):
     @mock.patch('requests.put')
     def test_caddypublisher_publishes_from_result(self, mock_put):
         url = "http://127.0.0.1:8080/uploads"
-        with LocalFetcher({'src': 'testcases'}) as f:
+        with LocalFetcher({'src': 'test/resources/testcases'}) as f:
             f.update()
             e = Executor(f.get_context())
             p = CaddyPublisher({'url': url})
             result = e.execute()
             stats = result.suite.statistics
-            self.assertEqual(stats.critical.total, 1)
+            self.assertEqual(stats.critical.total, 2)
             p.publish(result)
             now = datetime.now().strftime('%d-%m-%yT%H%M')
             self.assertTrue(mock_put.call_args.args[0]

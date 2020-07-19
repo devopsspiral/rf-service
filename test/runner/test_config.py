@@ -110,3 +110,12 @@ class TestConfig(unittest.TestCase):
         self.assertTrue(called_fetcher)
         c.register_fetcher_callback(callback_publisher)
         self.assertTrue(called_publisher)
+
+    def test_config_gets_rf_settings(self):
+        c = Config(config_file='test/resources/run1.json')
+        self.assertEqual('smoke',
+                         c.get_rf_settings()['include_tags'][0])
+
+    def test_config_rf_settings_has_defaults(self):
+        c = Config(config_file='test/resources/run2.json')
+        self.assertIsNone(c.get_rf_settings()['exclude_tags'])

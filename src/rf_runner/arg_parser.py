@@ -10,10 +10,16 @@ from rf_runner.config import Config
 class ArgParser(object):
 
     def __init__(self):
-        self.config = {"fetcher": {}, "publisher": {}}
+        self.config = {"fetcher": {}, "publisher": {}, "robotframework": {}}
         self.parser = argparse.ArgumentParser(description='RobotFramework service.')
         self.parser.add_argument('config_file', type=str, nargs='?', default=None,
                                  help='JSON config file')
+        self.parser.add_argument('-i', '--include', action='append',
+                                 dest='include_tags',
+                                 help='Include test tags')
+        self.parser.add_argument('-e', '--exclude', action='append',
+                                 dest='exclude_tags',
+                                 help='Exclude test tags')
         self.add_arguments_from_meta(PublisherFactory.get_meta())
         self.add_arguments_from_meta(FetcherFactory.get_meta())
 
@@ -30,6 +36,7 @@ class ArgParser(object):
         if not self.parameters.config_file:
             self.params_to_dict('Publisher')
             self.params_to_dict('Fetcher')
+            self.add_rf_settings()
             return Config(data=self.config)
         return Config(config_file=self.parameters.config_file)
 
@@ -46,4 +53,8 @@ class ArgParser(object):
                     {param_group.lower(): {param: getattr(self.parameters, param_name),
                                            'type': param_type}})
 
-
+    def add_rf_settings(self):
+        self.config["robotframework"] = {
+            "include_tags": self.parameters.include_tags,
+            "exclude_tags": self.parameters.exclude_tags,
+        }

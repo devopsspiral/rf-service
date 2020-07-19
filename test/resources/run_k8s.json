@@ -1,7 +1,7 @@
 {
     "fetcher": {
         "type": "ZipFetcher",
-        "url": "https://github.com/devopsspiral/KubeLibrary/archive/master.zip"
+        "url": "https://github.com/devopsspiral/rf-service/archive/octopus_support.zip"
     },
     "publisher": {
         "type": "CaddyPublisher",

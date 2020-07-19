@@ -44,10 +44,12 @@ class TestRunner(unittest.TestCase):
         c = Config('test/resources/run_k8s.json')
         r = Runner(c)
         tests = r.discover_tests()
-        self.assertEqual('KubeLibrary-master', tests[0]['name'])
-        self.assertEqual('Testcases', tests[0]['children'][0]['name'])
-        self.assertEqual('System Smoke', tests[0]['children'][0]['children'][0]['name'])
-        self.assertEqual('Kubernetes has correct version', tests[0]['children'][0]['children'][0]['children'][0]['name'])
+        self.assertEqual('Rf-Service-Octopus Support', tests[0]['name'])
+        self.assertEqual('Test', tests[0]['children'][0]['name'])
+        self.assertEqual('Resources', tests[0]['children'][0]['children'][0]['name'])
+        self.assertEqual('Testcases', tests[0]['children'][0]['children'][0]['children'][0]['name'])
+        self.assertEqual('Activate Skynet', tests[0]['children'][0]['children'][0]['children'][0]['children'][0]['name'])
+        self.assertEqual('Should Activate Skynet', tests[0]['children'][0]['children'][0]['children'][0]['children'][0]['children'][0]['name'])
         r.cleanup()
 
     def test_runner_discovers_tests_when_not_initialized(self):
@@ -63,7 +65,7 @@ class TestRunner(unittest.TestCase):
         r = Runner(c)
         r.run()
         fetcher_update.assert_called_once()
-        executor_execute.assert_called_once()
+        executor_execute.assert_called_once_with(include_tags=['smoke'], exclude_tags=['nonsmoke'])
         publisher_publish.assert_called_once()
         r.cleanup()
 
@@ -75,7 +77,7 @@ class TestRunner(unittest.TestCase):
         r = Runner(c)
         r.run()
         fetcher_update.assert_called_once()
-        executor_execute.assert_called_once()
+        executor_execute.assert_called_once_with(include_tags=['smoke'], exclude_tags=None)
         publisher_publish.assert_called_once()
         r.cleanup()
 

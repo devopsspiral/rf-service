@@ -78,7 +78,9 @@ class Runner(object):
 
     def run(self):
         e = Executor(self.fetcher.get_context())
-        self.publisher.publish(e.execute())
+        rf_settings = self.config.get_rf_settings()
+        self.publisher.publish(e.execute(include_tags=rf_settings['include_tags'],
+                                         exclude_tags=rf_settings['exclude_tags']))
 
     def cleanup(self):
         self.fetcher.remove()
