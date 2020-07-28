@@ -6,5 +6,9 @@
     "publisher": {
         "type": "CaddyPublisher",
         "url": "http://127.0.0.1:8080/uploads"
+    },
+    "robotframework": {
+        "include_tags": ["smoke"],
+        "exclude_tags": ["nonsmoke"]
     }
 }

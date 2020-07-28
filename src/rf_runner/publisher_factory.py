@@ -4,15 +4,14 @@ from rf_runner import publisher
 
 class PublisherFactory(object):
 
-    def __init__(self):
-        self.publishers = []
-
-    def get(self, data):
+    @staticmethod
+    def get(data):
         targetClass = getattr(publisher, data['type'])
         instance = targetClass(data)
         return instance
 
-    def get_meta(self):
+    @staticmethod
+    def get_meta():
         result = {}
         for name, obj in inspect.getmembers(publisher):
             if inspect.isclass(obj) and 'Abstract' not in name \

@@ -3,6 +3,6 @@
 
 *.pyc
 *.pyo
-src/robotframework_kubelibrary.egg-info/
+src/rf_service.egg-info/
 dist/
 build/

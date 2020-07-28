@@ -1,7 +1,7 @@
 import requests
 from datetime import datetime
 from robot.api import ResultWriter
-from .exceptions import NotOverriddenException
+from rf_runner.exceptions import NotOverriddenException
 
 
 class AbstractPublisher(object):
@@ -52,7 +52,7 @@ class LocalPublisher(AbstractPublisher):
 
     @staticmethod
     def meta():
-        return {'dest': 'string'}
+        return {'dest': 'str'}
 
 
 class CaddyPublisher(AbstractPublisher):
@@ -76,4 +76,4 @@ class CaddyPublisher(AbstractPublisher):
 
     @staticmethod
     def meta():
-        return {'url': 'string'}
+        return {'url': 'str'}

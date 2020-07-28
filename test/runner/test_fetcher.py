@@ -6,9 +6,10 @@ from rf_runner.fetcher import AbstractFetcher, LocalFetcher, ZipFetcher
 from rf_runner.fetcher_factory import FetcherFactory
 
 lf_config = {'src': 'testcases'}
-zf_config = {'url': 'https://github.com/devopsspiral/KubeLibrary/archive/master.zip'}
-zfp_config = {'url': 'https://github.com/devopsspiral/KubeLibrary/archive/master.zip',
-              'path': 'KubeLibrary-master/testcases'}
+zf_config = {'url': 'https://github.com/devopsspiral/rf-service/archive/master.zip'}
+zfp_config = {'url': 'https://github.com/devopsspiral/rf-service/archive/master.zip',
+              'path': 'rf-service-master/test/resources/testcases'}
+
 
 class TestFetcher(unittest.TestCase):
 
@@ -39,20 +40,17 @@ class TestFetcher(unittest.TestCase):
 
     def test_fetcher_factory_creates_localfetcher(self):
         data = {'type': 'LocalFetcher', 'src': 'testcases'}
-        ff = FetcherFactory()
-        f = ff.get(data)
+        f = FetcherFactory.get(data)
         self.assertTrue(isinstance(f, LocalFetcher))
         self.assertEqual('testcases', f.src)
 
     def test_fetcher_factory_creates_zipfetcher(self):
         data = {'type': 'ZipFetcher', 'url': 'http://someurl'}
-        ff = FetcherFactory()
-        f = ff.get(data)
+        f = FetcherFactory.get(data)
         self.assertTrue(isinstance(f, ZipFetcher))
         self.assertEqual('http://someurl', f.url)
         data = {'type': 'ZipFetcher', 'url': 'http://someurl', 'path': 'somepath'}
-        ff = FetcherFactory()
-        f = ff.get(data)
+        f = FetcherFactory.get(data)
         self.assertEqual('http://someurl', f.url)
         self.assertEqual('somepath', f.path)
 
@@ -91,7 +89,7 @@ class TestFetcher(unittest.TestCase):
     def test_zip_fetcher_gets_all_files(self):
         with ZipFetcher(zf_config) as f:
             f.fetch()
-            self.assertEqual('KubeLibrary-master', os.listdir(f.get_context())[0])
+            self.assertEqual('rf-service-master', os.listdir(f.get_context())[0])
         self.assertFalse(os.path.exists(f.context))
 
     def test_zip_fetcher_gets_specific_dir(self):
@@ -101,4 +99,4 @@ class TestFetcher(unittest.TestCase):
             for r, _, files in os.walk(f.get_context()):
                 for filename in files:
                     existing_files.append(os.path.join(r, filename))
-            self.assertEqual(3, len(existing_files))
+            self.assertEqual(2, len(existing_files))

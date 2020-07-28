@@ -21,6 +21,46 @@ probably fail on your cluster. If you want to see them pass you need k3s/k3d and
 
 ## Usage
 
+### 0.3.0 changes
+
+*Helm chart doesn't support those changes yet.*
+
+See [Testing with octopus](https://devopsspiral.com/articles/k8s/testing-with-octopus/).
+
+#### CLI improvements
+
+Since 0.3.0 rf-service can be configured using CLI parameters in a form of:
+
+```
+rf-service --LocalFetcher-src ~/test/source --LocalPublisher-dest ~/test/results
+```
+
+which is equivalent of:
+
+```
+{
+    "fetcher": {
+        "type": "LocalFetcher",
+        "src": "~/test/source"
+    },
+    "publisher": {
+        "type": "LocalPublisher",
+        "dest": "~/test/results"
+    }
+}
+```
+
+Additionally CLI support following flags:
+
+| CLI parameter | Comment           |
+| ------------- | ----------------- |
+| -i/--include  | include test tags |
+| -e/--exclude  | exclude test tags |
+
+#### Dependency resolution
+
+In a path towards making rf-service generic enough to be executed as a base for different kinds of testcases, support for pip requirements was added. This way if fetcher collects directory containg *requirements.txt* file, it will install packages as with `pip install -r requirements.txt`. Just remember first spotted requirements.txt file will be used, so it is best to keep one in top level directory.
+
 ### Building own test image
 
 rf-service image should contain only logic connected with running RobotFramework tests, to include external test libraries you should build your own image similar to dockerfile in `docker-k8s/Dockerfile`:
@@ -109,6 +149,8 @@ python -m unittest
 [Testing on kubernetes - rf-service](https://devopsspiral.com/articles/k8s/robotframework-service/)
 
 [Intro to Vue.js. Testing on kubernetes - rf-service frontend.](https://devopsspiral.com/articles/k8s/robotframework-service-fe/)
+
+[Testing with octopus](https://devopsspiral.com/articles/k8s/testing-with-octopus/)
 
 ### Repositories
 

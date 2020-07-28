@@ -35,8 +35,8 @@ class TestRunner(unittest.TestCase):
         c.load_publisher(p_config)
         f_config = {'type': 'LocalFetcher', 'src': 'testcases'}
         c.load_fetcher(f_config)
-        self.assertEqual({'src': 'string'}, r.fetcher.meta())
-        self.assertEqual({'dest': 'string'}, r.publisher.meta())
+        self.assertEqual({'src': 'str'}, r.fetcher.meta())
+        self.assertEqual({'dest': 'str'}, r.publisher.meta())
         create_context.assert_called_once()
         fetcher_update.assert_called_once()
 
@@ -44,10 +44,12 @@ class TestRunner(unittest.TestCase):
         c = Config('test/resources/run_k8s.json')
         r = Runner(c)
         tests = r.discover_tests()
-        self.assertEqual('KubeLibrary-master', tests[0]['name'])
-        self.assertEqual('Testcases', tests[0]['children'][0]['name'])
-        self.assertEqual('System Smoke', tests[0]['children'][0]['children'][0]['name'])
-        self.assertEqual('Kubernetes has correct version', tests[0]['children'][0]['children'][0]['children'][0]['name'])
+        self.assertEqual('Rf-Service-Octopus Support', tests[0]['name'])
+        self.assertEqual('Test', tests[0]['children'][0]['name'])
+        self.assertEqual('Resources', tests[0]['children'][0]['children'][0]['name'])
+        self.assertEqual('Testcases', tests[0]['children'][0]['children'][0]['children'][0]['name'])
+        self.assertEqual('Activate Skynet', tests[0]['children'][0]['children'][0]['children'][0]['children'][0]['name'])
+        self.assertEqual('Should Activate Skynet', tests[0]['children'][0]['children'][0]['children'][0]['children'][0]['children'][0]['name'])
         r.cleanup()
 
     def test_runner_discovers_tests_when_not_initialized(self):
@@ -55,22 +57,78 @@ class TestRunner(unittest.TestCase):
         r = Runner(c)
         self.assertEqual([], r.discover_tests())
 
+    @mock.patch('rf_runner.executor.Executor.execute')
     @mock.patch('rf_runner.publisher.CaddyPublisher.publish')
     @mock.patch('rf_runner.fetcher.LocalFetcher.update')
-    def test_runner_runs1(self, fetcher_update, publisher_publish):
+    def test_runner_runs1(self, fetcher_update, publisher_publish, executor_execute):
         c = Config('test/resources/run1.json')
         r = Runner(c)
         r.run()
         fetcher_update.assert_called_once()
+        executor_execute.assert_called_once_with(include_tags=['smoke'], exclude_tags=['nonsmoke'])
         publisher_publish.assert_called_once()
         r.cleanup()
 
+    @mock.patch('rf_runner.executor.Executor.execute')
     @mock.patch('rf_runner.publisher.LocalPublisher.publish')
     @mock.patch('rf_runner.fetcher.ZipFetcher.update')
-    def test_runner_runs2(self, fetcher_update, publisher_publish):
+    def test_runner_runs2(self, fetcher_update, publisher_publish, executor_execute):
         c = Config('test/resources/run2.json')
         r = Runner(c)
         r.run()
         fetcher_update.assert_called_once()
+        executor_execute.assert_called_once_with(include_tags=['smoke'], exclude_tags=None)
         publisher_publish.assert_called_once()
+        r.cleanup()
+
+    def test_find_requirements(self):
+        c = Config(data={"fetcher": {"type": "LocalFetcher",
+                                     "src": "test/resources/testcases"
+                                     }
+                         })
+        r = Runner(c)
+        self.assertTrue('requirements.txt' in r.get_requirements())
+
+    def test_find_requirements2(self):
+        c = Config(data={"fetcher": {"type": "ZipFetcher",
+                                     "url": "https://github.com/devopsspiral/rf-service/archive/master.zip",
+                                     "path": "rf-service-master/test/resources/testcases"
+                                     }
+                         })
+        r = Runner(c)
+        self.assertTrue('rf-service-master/test/resources/testcases/requirements.txt' in r.get_requirements())
+
+    def test_has_requirements(self):
+        c = Config(data={"fetcher": {"type": "LocalFetcher",
+                                     "src": "test/resources/testcases"
+                                     }
+                         })
+        r = Runner(c)
+        self.assertTrue(r.has_requirements())
+        r.cleanup()
+        c = Config(data={"fetcher": {"type": "LocalFetcher",
+                                     "src": "test"
+                                     }
+                         })
+        r = Runner(c)
+        self.assertFalse(r.has_requirements())
+        r.cleanup()
+
+    def test_pip_install(self):
+        c = Config(data={"fetcher": {"type": "LocalFetcher",
+                                     "src": "test/resources/testcases"
+                                     }
+                         })
+        r = Runner(c)
+        self.assertTrue('Could not find a version that satisfies' in str(r.pip_install_requirements()))
+        r.cleanup()
+
+    @mock.patch('rf_runner.runner.Runner.pip_install_requirements')
+    def test_runner_install_dependencies(self, pip_install):
+        c = Config(data={"fetcher": {"type": "LocalFetcher",
+                                     "src": "test/resources/testcases"
+                                     }
+                         })
+        r = Runner(c)
+        pip_install.assert_called_once()
         r.cleanup()

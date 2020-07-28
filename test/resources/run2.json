@@ -1,10 +1,13 @@
 {
     "fetcher": {
         "type": "ZipFetcher",
-        "url": "https://github.com/devopsspiral/KubeLibrary/archive/master.zip"
+        "url": "https://github.com/devopsspiral/rf-service/archive/master.zip"
     },
     "publisher": {
         "type": "LocalPublisher",
-        "src": "somecontext"
+        "dest": "somecontext"
+    },
+    "robotframework": {
+        "include_tags": ["smoke"]
     }
 }

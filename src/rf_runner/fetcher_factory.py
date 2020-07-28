@@ -4,15 +4,14 @@ from rf_runner import fetcher
 
 class FetcherFactory(object):
 
-    def __init__(self):
-        self.fetchers = []
-
-    def get(self, data):
+    @staticmethod
+    def get(data):
         targetClass = getattr(fetcher, data['type'])
         instance = targetClass(data)
         return instance
 
-    def get_meta(self):
+    @staticmethod
+    def get_meta():
         result = {}
         for name, obj in inspect.getmembers(fetcher):
             if inspect.isclass(obj) and 'Abstract' not in name \

@@ -78,7 +78,7 @@ class LocalFetcher(AbstractFetcher):
 
     @staticmethod
     def meta():
-        return {'src': 'string'}
+        return {'src': 'str'}
 
 
 class ZipFetcher(AbstractFetcher):
@@ -104,4 +104,4 @@ class ZipFetcher(AbstractFetcher):
 
     @staticmethod
     def meta():
-        return {'url': 'string', 'path': 'string'}
+        return {'url': 'str', 'path': 'str'}
