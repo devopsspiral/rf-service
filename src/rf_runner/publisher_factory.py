@@ -4,9 +4,6 @@ from rf_runner import publisher
 
 class PublisherFactory(object):
 
-    # def __init__(self):
-    #     self.publishers = []
-
     @staticmethod
     def get(data):
         targetClass = getattr(publisher, data['type'])

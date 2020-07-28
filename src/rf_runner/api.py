@@ -15,8 +15,6 @@ from rf_runner.runner import Runner
 
 app = Flask(__name__)
 CORS(app)
-# pf = PublisherFactory()
-# ff = FetcherFactory()
 config = Config()
 runner = Runner(config)
 

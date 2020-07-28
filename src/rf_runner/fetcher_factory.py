@@ -4,9 +4,6 @@ from rf_runner import fetcher
 
 class FetcherFactory(object):
 
-    # def __init__(self):
-    #     self.fetchers = []
-
     @staticmethod
     def get(data):
         targetClass = getattr(fetcher, data['type'])

@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="rf-service",
-    version="0.3.4",
+    version="0.3.0",
     author="Michał Wcisło",
     author_email="mwcislo999@gmail.com",
     description="Robot Framework service",

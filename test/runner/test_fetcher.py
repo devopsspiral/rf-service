@@ -40,19 +40,16 @@ class TestFetcher(unittest.TestCase):
 
     def test_fetcher_factory_creates_localfetcher(self):
         data = {'type': 'LocalFetcher', 'src': 'testcases'}
-        # ff = FetcherFactory()
         f = FetcherFactory.get(data)
         self.assertTrue(isinstance(f, LocalFetcher))
         self.assertEqual('testcases', f.src)
 
     def test_fetcher_factory_creates_zipfetcher(self):
         data = {'type': 'ZipFetcher', 'url': 'http://someurl'}
-        # ff = FetcherFactory()
         f = FetcherFactory.get(data)
         self.assertTrue(isinstance(f, ZipFetcher))
         self.assertEqual('http://someurl', f.url)
         data = {'type': 'ZipFetcher', 'url': 'http://someurl', 'path': 'somepath'}
-        # ff = FetcherFactory()
         f = FetcherFactory.get(data)
         self.assertEqual('http://someurl', f.url)
         self.assertEqual('somepath', f.path)
