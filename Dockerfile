@@ -11,6 +11,7 @@ FROM python:3.8.1-alpine
 #release
 RUN apk add --no-cache \
     build-base \
+    libffi-dev \
     && pip install gevent \
     && apk del build-base \
     && pip install rf-service==0.3.0
