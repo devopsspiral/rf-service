@@ -21,7 +21,7 @@ probably fail on your cluster. If you want to see them pass you need k3s/k3d and
 
 ## Usage
 
-### 0.3.0 changes
+### 0.3.1 changes
 
 *Helm chart doesn't support those changes yet.*
 
@@ -29,7 +29,7 @@ See [Testing with octopus](https://devopsspiral.com/articles/k8s/testing-with-oc
 
 #### CLI improvements
 
-Since 0.3.0 rf-service can be configured using CLI parameters in a form of:
+Since 0.3.1 rf-service can be configured using CLI parameters in a form of:
 
 ```
 rf-service --LocalFetcher-src ~/test/source --LocalPublisher-dest ~/test/results
