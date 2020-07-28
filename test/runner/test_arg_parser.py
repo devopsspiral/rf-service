@@ -17,25 +17,14 @@ example_caddy_publisher = {"publisher": {
                             },
                            "fetcher": {}
                            }
-example_zip_fetcher = {"fetcher": {
-                        "type": "ZipFetcher",
-                        "url": "https://github.com/devopsspiral/KubeLibrary/archive/master.zip"
-                       },
-                       "publisher": {}
-                       }
-example_zip_fetcher = {"fetcher": {
-                        "type": "LocalFetcher",
-                        "url": "/tmp/testcases"
-                       },
-                       "publisher": {}
-                       }
 example_mixed = {"publisher": {
                                 "type": "CaddyPublisher",
                                 "url": "http://rf-service-caddy/uploads"
                             },
                  "fetcher": {
                         "type": "ZipFetcher",
-                        "url": "https://github.com/devopsspiral/KubeLibrary/archive/master.zip"
+                        "url": "https://github.com/devopsspiral/rf-service/archive/master.zip",
+                        "path": "rf-service-master/test/resources/testcases"
                        }
                  }
 
@@ -84,7 +73,8 @@ class TestArgParser(unittest.TestCase):
     def test_arg_parser_returns_config_mixed(self):
         ap = ArgParser()
         ap._parse(['--CaddyPublisher-url', 'http://rf-service-caddy/uploads',
-                  '--ZipFetcher-url', 'https://github.com/devopsspiral/KubeLibrary/archive/master.zip'])
+                   '--ZipFetcher-url', 'https://github.com/devopsspiral/rf-service/archive/master.zip',
+                   '--ZipFetcher-path', 'rf-service-master/test/resources/testcases'])
         c = ap._get_config()
         self.assertEqual(example_mixed["publisher"], c.get_publisher())
         self.assertEqual(example_mixed["fetcher"], c.get_fetcher())

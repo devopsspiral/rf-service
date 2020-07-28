@@ -6,7 +6,7 @@ FROM python:3.8.1-alpine
 #     libffi-dev \
 #     && pip install gevent \
 #     && apk del build-base
-# RUN pip install --index-url https://test.pypi.org/simple/ robotframework-kubelibrary==0.1.5 rf-service==0.3.5
+# RUN pip install --index-url https://test.pypi.org/simple/ rf-service==0.3.6
 
 #release
 RUN apk add --no-cache \
@@ -14,6 +14,6 @@ RUN apk add --no-cache \
     libffi-dev \
     && pip install gevent \
     && apk del build-base \
-    && pip install rf-service==0.3.0
+    && pip install rf-service==0.3.1
 
 CMD rf-service

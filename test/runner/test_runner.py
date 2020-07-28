@@ -91,12 +91,12 @@ class TestRunner(unittest.TestCase):
 
     def test_find_requirements2(self):
         c = Config(data={"fetcher": {"type": "ZipFetcher",
-                                     "url": "https://github.com/devopsspiral/kube-tests/archive/master.zip",
-                                     "path": "kube-tests-master/testcases"
+                                     "url": "https://github.com/devopsspiral/rf-service/archive/master.zip",
+                                     "path": "rf-service-master/test/resources/testcases"
                                      }
                          })
         r = Runner(c)
-        self.assertTrue('kube-tests-master/testcases/requirements.txt' in r.get_requirements())
+        self.assertTrue('rf-service-master/test/resources/testcases/requirements.txt' in r.get_requirements())
 
     def test_has_requirements(self):
         c = Config(data={"fetcher": {"type": "LocalFetcher",
