@@ -1,6 +1,6 @@
 # RF-service
 
-RobotFramework is a service for running tests/healthchecks for kubernetes cluster. It can work in two modes: on-demand execution with [frontend](https://github.com/devopsspiral/rf-service-fe) and as Kubernetes CronJob that executes tests at given schedule and publish it in Caddy server. 
+RF-service is a service for running tests. In long run it should provide functionality that covers everything between writing tests and viewing test results, by simplifing when, how and where to run the tests. It can work in two modes: on-demand execution with [frontend](https://github.com/devopsspiral/rf-service-fe) and as Kubernetes CronJob that executes tests at given schedule. Rf-service is also packaged as a container image so it can be used in other ways, like for example with Octopus (see [article on that](https://devopsspiral.com/articles/k8s/testing-with-octopus/)).
 
 ## Quick start
 
@@ -99,7 +99,7 @@ It configures rf-service to get testcases from given url (branch in github) and 
 
 In helm chart, config file content can be defined using .Values.config and it is kept as ConfigMap on cluster.
 
-When using Web UI (.Values.config is empty string) the same configuration can be done in Configure tab. You need to save both Publisher and Fetcher config separetly. To use internal Caddy container you need to pass http://<ingress host>/caddy/uploads, i.e. http://rf-service.local/caddy/uploads
+When using Web UI (.Values.config is empty string) the same configuration can be done in Configure tab. You need to save both Publisher and Fetcher config separetly. To use internal Caddy container you need to pass http://localhost:8090/uploads - as all the containers are part of the same pod, all the ports are accessible on localhost.
 
 ### Helm chart
 

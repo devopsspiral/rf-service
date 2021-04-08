@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="rf-service",
-    version="0.3.1",
+    version="0.3.2",
     author="Michał Wcisło",
     author_email="mwcislo999@gmail.com",
     description="Robot Framework service",
@@ -31,6 +31,7 @@ setuptools.setup(
         'requests',
         'flask',
         'flask-cors',
-        'gevent'
+        'gevent',
+        'azure-storage-blob'
     ],
 )

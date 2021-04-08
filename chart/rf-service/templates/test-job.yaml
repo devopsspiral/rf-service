@@ -12,7 +12,7 @@ spec:
           serviceAccountName: {{ include "rf-service.fullname" . }}-sa
           containers:
           - name: {{ .Chart.Name }}
-            image: "{{ .Values.rfService.image.repository }}:{{ .Chart.AppVersion }}"
+            image: "{{ .Values.rfService.image.repository }}:{{ .Values.rfService.image.version }}"
             imagePullPolicy: {{ .Values.rfService.image.pullPolicy }}
             command: ["rf-service", "/etc/rf-service/run.json"]
             {{- if .Values.extraEnv }}

@@ -33,16 +33,16 @@ spec:
         paths:
           - path: "/"
             backend:
-              serviceName: {{ $fullName }}-rf-service
+              serviceName: {{ $fullName }}
               servicePort: {{ $svcPort }}
           - path: "/caddy/"
             backend:
-              serviceName: {{ $fullName }}-rf-service
+              serviceName: {{ $fullName }}
               servicePort: 8090
         {{- if not $.Values.config }}
           - path: "/api/"
             backend:
-              serviceName: {{ $fullName }}-rf-service
+              serviceName: {{ $fullName }}
               servicePort: 5000
         {{- end }}
   {{- end }}

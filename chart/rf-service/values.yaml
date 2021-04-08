@@ -5,8 +5,8 @@
 replicaCount: 1
 rfService:
   image:
-    repository: mwcislo/rf-service-k8s
-    version: 0.2.0
+    repository: mwcislo/rf-service
+    version: 0.3.2
     pullPolicy: IfNotPresent
 rfFE:
   image:
@@ -23,7 +23,8 @@ config: ""
 #   {
 #     "fetcher": {
 #         "type": "ZipFetcher",
-#         "url": "https://github.com/devopsspiral/KubeLibrary/archive/incluster.zip"
+#         "url": "https://github.com/devopsspiral/rf-service/archive/master.zip",
+#         "path": "rf-service-master/test/resources/testcases"
 #     },
 #     "publisher": {
 #         "type": "CaddyPublisher",

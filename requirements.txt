@@ -1,8 +1,9 @@
-robotframework
+robotframework>=3.2.2
 datetime
 requests
 flask
 flask-cors
 gevent
+azure-storage-blob
 # dev
 mock
