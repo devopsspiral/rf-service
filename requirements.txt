@@ -4,5 +4,6 @@ requests
 flask
 flask-cors
 gevent
+azure-storage-blob
 # dev
 mock

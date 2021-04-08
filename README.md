@@ -1,6 +1,6 @@
 # RF-service
 
-RF-service is a service for running tests. It can work in two modes: on-demand execution with [frontend](https://github.com/devopsspiral/rf-service-fe) and as Kubernetes CronJob that executes tests at given schedule and publish it in Caddy server. 
+RF-service is a service for running tests. In long run it should provide functionality that covers everything between writing tests and viewing test results, by simplifing when, how and where to run the tests. It can work in two modes: on-demand execution with [frontend](https://github.com/devopsspiral/rf-service-fe) and as Kubernetes CronJob that executes tests at given schedule. Rf-service is also packaged as a container image so it can be used in other ways, like for example with Octopus (see [article on that](https://devopsspiral.com/articles/k8s/testing-with-octopus/)).
 
 ## Quick start
 

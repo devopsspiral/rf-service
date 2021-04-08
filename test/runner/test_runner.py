@@ -17,7 +17,7 @@ class TestRunner(unittest.TestCase):
         self.assertEqual(None, r.fetcher)
         self.assertEqual(None, r.publisher)
         fetcher_update.assert_not_called()
-        p_config = {'type': 'LocalPublisher', 'src': 'testcases'}
+        p_config = {'type': 'LocalPublisher', 'dest': 'testcases'}
         c.load_publisher(p_config)
         f_config = {'type': 'LocalFetcher', 'src': 'testcases'}
         c.load_fetcher(f_config)
@@ -44,7 +44,7 @@ class TestRunner(unittest.TestCase):
         c = Config('test/resources/run_k8s.json')
         r = Runner(c)
         tests = r.discover_tests()
-        self.assertEqual('Rf-Service-Octopus Support', tests[0]['name'])
+        self.assertEqual('Rf-Service-Master', tests[0]['name'])
         self.assertEqual('Test', tests[0]['children'][0]['name'])
         self.assertEqual('Resources', tests[0]['children'][0]['children'][0]['name'])
         self.assertEqual('Testcases', tests[0]['children'][0]['children'][0]['children'][0]['name'])

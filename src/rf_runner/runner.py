@@ -10,7 +10,7 @@ from rf_runner.fetcher_factory import FetcherFactory
 
 logging.basicConfig()
 logger = logging.getLogger("runner")
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 
 class Runner(object):

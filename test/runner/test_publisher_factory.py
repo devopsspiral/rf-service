@@ -11,6 +11,11 @@ class TestPublisherFactory(unittest.TestCase):
                         },
                         'LocalPublisher': {
                             'dest': 'str'
-                        }
+                        },
+                        'AzureBlobPublisher': {
+                            'connection_string': 'str',
+                            'path': 'str',
+                            'prefix': 'str',
+                            'blob_url': 'str'}
                     }
         self.assertEqual(expected, PublisherFactory.get_meta())

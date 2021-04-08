@@ -17,6 +17,12 @@ example_caddy_publisher = {"publisher": {
                             },
                            "fetcher": {}
                            }
+example_azureblov_publisher = {"publisher": {
+                                "type": "AzureBlobPublisher",
+                                "connection_string": "http://connection.string"
+                            },
+                           "fetcher": {}
+                           }
 example_mixed = {"publisher": {
                                 "type": "CaddyPublisher",
                                 "url": "http://rf-service-caddy/uploads"
@@ -48,6 +54,20 @@ class TestArgParser(unittest.TestCase):
         ap._parse(['--LocalPublisher-dest', 'somecontext'])
         self.assertEqual('somecontext', ap.parameters.LocalPublisher_dest)
 
+    def test_arg_parser_saves_caddypublisher(self):
+        ap = ArgParser()
+        ap._parse(['--CaddyPublisher-url', 'http://127.0.0.1:8080/upload'])
+        self.assertEqual('http://127.0.0.1:8080/upload', ap.parameters.CaddyPublisher_url)
+
+    def test_arg_parser_saves_azureblobpublisher(self):
+        ap = ArgParser()
+        ap._parse(['--AzureBlobPublisher-connection_string', 'http://someurl',
+                   '--AzureBlobPublisher-path', 'path/to/container/',
+                   '--AzureBlobPublisher-prefix', 'super_test_prefix-'])
+        self.assertEqual('http://someurl', ap.parameters.AzureBlobPublisher_connection_string)
+        self.assertEqual('path/to/container/', ap.parameters.AzureBlobPublisher_path)
+        self.assertEqual('super_test_prefix-', ap.parameters.AzureBlobPublisher_prefix)
+
     def test_arg_parser_saves_localfetcher(self):
         ap = ArgParser()
         ap._parse(['--LocalFetcher-src', 'somecontext'])
@@ -69,6 +89,12 @@ class TestArgParser(unittest.TestCase):
         c = ap._get_config()
         self.assertEqual(example_local_publisher["publisher"], c.get_publisher())
         self.assertEqual(example_local_publisher["robotframework"], c.get_rf_settings())
+
+    def test_arg_parser_parses_azureblobpublisher(self):
+        ap = ArgParser()
+        ap._parse(['--AzureBlobPublisher-connection_string', 'http://connection.string'])
+        c = ap._get_config()
+        self.assertEqual(example_azureblov_publisher["publisher"], c.get_publisher())
 
     def test_arg_parser_returns_config_mixed(self):
         ap = ArgParser()

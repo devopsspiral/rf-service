@@ -48,7 +48,7 @@ class ArgParser(object):
         for param_name in dir(self.parameters):
             if param_group in param_name and getattr(self.parameters, param_name):
                 param_type = param_name.split('_')[0]
-                param = param_name.split('_')[-1]
+                param = param_name.split('_', 1)[-1]
                 self.config[param_group.lower()].update(
                     {param: getattr(self.parameters, param_name),
                      'type': param_type})

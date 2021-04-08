@@ -6,7 +6,7 @@ replicaCount: 1
 rfService:
   image:
     repository: mwcislo/rf-service
-    version: 0.3.0
+    version: 0.3.2
     pullPolicy: IfNotPresent
 rfFE:
   image:
